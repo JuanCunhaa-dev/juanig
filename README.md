@@ -44,8 +44,6 @@ juanig --setup
 
 Upgrade later with `juanig --update`.
 
-`--setup` / `--install-skills` copies the skill only into IDEs that are already installed.
-
 `--setup` / `--install-skills` copies the skill only into IDEs that are already installed (the app folder already exists). It will not create Claude/Windsurf/Continue folders just because you have Cursor.
 
 ## CLI
@@ -63,6 +61,7 @@ juanig [URL ...] [options]
 | `--setup` | Put juanig on PATH and write AI skills for installed IDEs |
 | `--install-skills` | Only write the skill files for installed IDEs |
 | `--update` | Upgrade to the latest GitHub version |
+| `-V`, `--version` | Print the installed version |
 | `-h`, `--help` | Show help |
 
 Environment variables: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.

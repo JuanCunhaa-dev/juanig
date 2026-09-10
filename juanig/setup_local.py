@@ -5,6 +5,8 @@ import sys
 from importlib.resources import files
 from pathlib import Path
 
+from juanig.constants import GITHUB_REPO
+
 
 def skill_text() -> str:
     return files("juanig.data").joinpath("SKILL.md").read_text(encoding="utf-8")
@@ -53,14 +55,16 @@ def add_windows_user_path(directory: str) -> None:
 
     key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0, winreg.KEY_READ | winreg.KEY_WRITE)
     try:
-        current, _kind = winreg.QueryValueEx(key, "Path")
-    except FileNotFoundError:
-        current = ""
-    parts = [part for part in current.split(";") if part]
-    if directory not in parts:
-        parts.append(directory)
-        winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, ";".join(parts))
-    winreg.CloseKey(key)
+        try:
+            current, _kind = winreg.QueryValueEx(key, "Path")
+        except FileNotFoundError:
+            current = ""
+        parts = [part for part in current.split(";") if part]
+        if directory not in parts:
+            parts.append(directory)
+            winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, ";".join(parts))
+    finally:
+        winreg.CloseKey(key)
     try:
         import ctypes
 
@@ -94,7 +98,7 @@ def run_setup() -> int:
             "Use the PowerShell installer instead:"
         )
         print(
-            "  irm https://github.com/JuanCunhaa-dev/juanig/releases/latest/download/install.ps1 | iex"
+            f"  irm https://github.com/{GITHUB_REPO}/releases/latest/download/install.ps1 | iex"
         )
         return 2
     launcher = install_launcher()

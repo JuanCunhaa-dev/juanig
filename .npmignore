@@ -9,5 +9,6 @@ build/
 .github/
 downloads/
 installer/
+tests/
 *.spec
 node_modules/

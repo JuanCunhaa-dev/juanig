@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-REPO="Juancunhaa-dev/juanig"
+REPO="JuanCunhaa-dev/juanig"
 DEST="${HOME}/.local/bin"
 mkdir -p "$DEST"
 

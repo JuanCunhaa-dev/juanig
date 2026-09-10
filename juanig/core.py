@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
@@ -27,10 +27,14 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
 )
+HTTP_TIMEOUT = (10, 30)
+DOWNLOAD_TIMEOUT = (10, 90)
+DOWNLOAD_GAP_SECONDS = 0.15
+CHUNK_SIZE = 64 * 1024
 
 
 class InstagramError(Exception):
-    """Erro amigável ao resolver ou baixar um post."""
+    """User-facing error while resolving or downloading a post."""
 
 
 @dataclass
@@ -81,29 +85,31 @@ class PostInfo:
 def parse_instagram_url(url: str) -> tuple[str, str]:
     text = (url or "").strip()
     if not text:
-        raise InstagramError("Cole um link do Instagram.")
+        raise InstagramError("Paste an Instagram link.")
     if not re.match(r"^https?://", text, re.I):
         text = "https://" + text.lstrip("/")
     match = INSTAGRAM_URL_RE.search(text)
     if not match:
         raise InstagramError(
-            "Esse link não parece um post, carrossel ou Reel do Instagram."
+            "This link does not look like an Instagram post, carousel, or Reel."
         )
     return match.group("kind").lower(), match.group("code")
 
 
 def shortcode_to_pk(shortcode: str) -> int:
+    if not shortcode:
+        raise InstagramError("Invalid Instagram shortcode.")
     value = 0
     for char in shortcode:
-        value = value * 64 + SHORTCODE_ALPHABET.index(char)
+        index = SHORTCODE_ALPHABET.find(char)
+        if index < 0:
+            raise InstagramError("Invalid Instagram shortcode.")
+        value = value * 64 + index
     return value
 
 
 def is_safe_cdn_url(url: str) -> bool:
-    try:
-        parsed = urlparse(url)
-    except Exception:
-        return False
+    parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
         return False
     host = (parsed.hostname or "").lower()
@@ -123,11 +129,6 @@ def guess_extension(url: str, kind: str) -> str:
         if path.endswith(ext):
             return "jpg" if ext == ".jpeg" else ext.lstrip(".")
     return "mp4" if kind == "video" else "jpg"
-
-
-def safe_filename_part(value: str | None, fallback: str) -> str:
-    text = re.sub(r"[^A-Za-z0-9._-]+", "_", (value or "").strip())
-    return text.strip("._") or fallback
 
 
 def user_downloads_dir() -> Path:
@@ -158,19 +159,29 @@ def unique_path(directory: Path, filename: str) -> Path:
 
 
 def describe_post(post: PostInfo) -> str:
+    count = len(post.media)
     kinds = {item.kind for item in post.media}
-    if post.product_type == "clips" or all(item.kind == "video" for item in post.media):
-        if len(post.media) == 1:
-            return "Reel / vídeo"
-    if len(post.media) > 1:
+    if count > 1:
         if kinds == {"image"}:
-            return f"Carrossel com {len(post.media)} fotos"
+            return f"Carousel ({count} photos)"
         if kinds == {"video"}:
-            return f"Carrossel com {len(post.media)} vídeos"
-        return f"Carrossel misto com {len(post.media)} itens"
+            return f"Carousel ({count} videos)"
+        return f"Mixed carousel ({count} items)"
+    if post.product_type == "clips":
+        return "Reel"
     if "video" in kinds:
-        return "Vídeo"
-    return "Foto"
+        return "Video"
+    return "Photo"
+
+
+def _as_json(response: requests.Response) -> dict[str, Any]:
+    try:
+        payload = response.json()
+    except ValueError as exc:
+        raise InstagramError("Instagram returned a non-JSON response.") from exc
+    if not isinstance(payload, dict):
+        raise InstagramError("Instagram returned an unexpected response.")
+    return payload
 
 
 def _caption_text(media: dict[str, Any]) -> str | None:
@@ -191,7 +202,7 @@ def _username(media: dict[str, Any]) -> str | None:
     return name if isinstance(name, str) and name.strip() else None
 
 
-def items_from_v1_media(media: dict[str, Any], shortcode: str) -> list[MediaItem]:
+def items_from_v1_media(media: dict[str, Any]) -> list[MediaItem]:
     children = media.get("carousel_media") or [media]
     result: list[MediaItem] = []
     for index, child in enumerate(children, start=1):
@@ -221,7 +232,7 @@ def items_from_v1_media(media: dict[str, Any], shortcode: str) -> list[MediaItem
     return result
 
 
-def items_from_legacy_node(node: dict[str, Any], shortcode: str) -> list[MediaItem]:
+def items_from_legacy_node(node: dict[str, Any]) -> list[MediaItem]:
     children = [
         (edge.get("node") or {})
         for edge in ((node.get("edge_sidecar_to_children") or {}).get("edges") or [])
@@ -256,7 +267,7 @@ class InstagramClient:
             {
                 "User-Agent": USER_AGENT,
                 "Accept": "*/*",
-                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Accept-Language": "en-US,en;q=0.9",
             }
         )
         self.sessionid = (sessionid or "").strip() or None
@@ -271,7 +282,7 @@ class InstagramClient:
     def _bootstrap(self) -> None:
         if self._bootstrapped:
             return
-        response = self.session.get("https://www.instagram.com/", timeout=30)
+        response = self.session.get("https://www.instagram.com/", timeout=HTTP_TIMEOUT)
         response.raise_for_status()
         self._csrf = self.session.cookies.get("csrftoken") or ""
         match = re.search(r'\["LSD",\[\],\{"token":"([^"]+)"', response.text)
@@ -294,22 +305,23 @@ class InstagramClient:
     def _follow_share(self, url: str, kind: str, shortcode: str) -> tuple[str, str]:
         if not kind.startswith("share/"):
             return kind, shortcode
-        response = self.session.get(url, timeout=30, allow_redirects=True)
+        response = self.session.get(url, timeout=HTTP_TIMEOUT, allow_redirects=True)
         match = INSTAGRAM_URL_RE.search(response.url)
         if not match:
-            raise InstagramError("Não consegui abrir esse link de compartilhamento.")
+            raise InstagramError("Could not open that share link.")
         return match.group("kind").lower(), match.group("code")
 
     def resolve(self, url: str) -> PostInfo:
         kind, shortcode = parse_instagram_url(url)
         canonical = f"https://www.instagram.com/{'reel' if 'reel' in kind else 'p'}/{shortcode}/"
         try:
-            kind, shortcode = self._follow_share(canonical if kind.startswith("share/") else url, kind, shortcode)
+            kind, shortcode = self._follow_share(
+                canonical if kind.startswith("share/") else url, kind, shortcode
+            )
             canonical = f"https://www.instagram.com/{'reel' if 'reel' in kind else 'p'}/{shortcode}/"
         except requests.RequestException as exc:
-            raise InstagramError(f"Falha ao abrir o link: {exc}") from exc
+            raise InstagramError(f"Failed to open the link: {exc}") from exc
 
-        errors: list[str] = []
         for method, loader in (
             ("graphql_polaris", self._resolve_polaris),
             ("graphql_media_id", self._resolve_logged_out),
@@ -320,11 +332,8 @@ class InstagramClient:
                 if post and post.media:
                     post.method = method
                     return post
-                errors.append(f"{method}: sem mídia")
-            except InstagramError as exc:
-                errors.append(f"{method}: {exc}")
-            except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
-                errors.append(f"{method}: {exc}")
+            except (InstagramError, requests.RequestException, ValueError, KeyError, TypeError):
+                continue
 
         raise InstagramError(
             "This post looks private, restricted, or Instagram blocked anonymous access. "
@@ -347,16 +356,18 @@ class InstagramClient:
                 "server_timestamps": "true",
             },
             headers=self._graphql_headers(shortcode),
-            timeout=30,
+            timeout=HTTP_TIMEOUT,
         )
         response.raise_for_status()
-        payload = response.json()
+        payload = _as_json(response)
         items = (
-            ((payload.get("data") or {}).get("xdt_api__v1__media__shortcode__web_info") or {}).get("items")
+            ((payload.get("data") or {}).get("xdt_api__v1__media__shortcode__web_info") or {}).get(
+                "items"
+            )
             or []
         )
         if not items:
-            raise InstagramError("GraphQL não devolveu o post.")
+            raise InstagramError("GraphQL did not return the post.")
         return self._post_from_v1(url, shortcode, items[0])
 
     def _resolve_logged_out(self, url: str, shortcode: str) -> PostInfo:
@@ -378,19 +389,19 @@ class InstagramClient:
                 "doc_id": POLARIS_LOGGED_OUT_DOC_ID,
             },
             headers=headers,
-            timeout=30,
+            timeout=HTTP_TIMEOUT,
         )
         response.raise_for_status()
-        payload = response.json()
+        payload = _as_json(response)
         media = ((payload.get("data") or {}).get("xig_polaris_media")) or {}
         inner = media.get("if_not_gated_logged_out") or media
         if not inner:
-            raise InstagramError("Post indisponível sem login.")
+            raise InstagramError("This post is unavailable without login.")
         if inner.get("image_versions2") or inner.get("video_versions") or inner.get("carousel_media"):
             return self._post_from_v1(url, shortcode, inner)
-        items = items_from_legacy_node(inner, shortcode)
+        items = items_from_legacy_node(inner)
         if not items:
-            raise InstagramError("Resposta sem arquivos de mídia.")
+            raise InstagramError("The response had no media files.")
         return PostInfo(
             url=url,
             shortcode=shortcode,
@@ -402,7 +413,7 @@ class InstagramClient:
 
     def _resolve_media_info(self, url: str, shortcode: str) -> PostInfo:
         if not self.sessionid:
-            raise InstagramError("Sem sessionid.")
+            raise InstagramError("No sessionid.")
         self._bootstrap()
         pk = shortcode_to_pk(shortcode)
         response = self.session.get(
@@ -414,21 +425,21 @@ class InstagramClient:
                 "x-csrftoken": self._csrf,
                 "referer": "https://www.instagram.com/",
             },
-            timeout=30,
+            timeout=HTTP_TIMEOUT,
         )
         if "accounts/login" in response.url:
-            raise InstagramError("O sessionid expirou ou é inválido.")
+            raise InstagramError("The sessionid expired or is invalid.")
         response.raise_for_status()
-        payload = response.json()
+        payload = _as_json(response)
         items = payload.get("items") or []
         if not items:
-            raise InstagramError("A API logada não devolveu o post.")
+            raise InstagramError("The logged-in API did not return the post.")
         return self._post_from_v1(url, shortcode, items[0])
 
     def _post_from_v1(self, url: str, shortcode: str, media: dict[str, Any]) -> PostInfo:
-        items = items_from_v1_media(media, shortcode)
+        items = items_from_v1_media(media)
         if not items:
-            raise InstagramError("O post veio sem foto ou vídeo.")
+            raise InstagramError("The post had no photo or video.")
         return PostInfo(
             url=url,
             shortcode=media.get("code") or shortcode,
@@ -438,26 +449,29 @@ class InstagramClient:
             media=items,
         )
 
-    def fetch_bytes(self, url: str) -> tuple[bytes, str]:
+    def download_file(self, url: str, path: Path) -> None:
         if not is_safe_cdn_url(url):
-            raise InstagramError("URL de mídia inválida.")
-        response = self.session.get(
+            raise InstagramError("Invalid media URL.")
+        with self.session.get(
             url,
             headers={"Referer": "https://www.instagram.com/", "User-Agent": USER_AGENT},
-            timeout=60,
+            timeout=DOWNLOAD_TIMEOUT,
             stream=True,
-        )
-        response.raise_for_status()
-        return response.content, response.headers.get("content-type") or "application/octet-stream"
+        ) as response:
+            response.raise_for_status()
+            with path.open("wb") as handle:
+                for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                    if chunk:
+                        handle.write(chunk)
 
     def download_post(self, post: PostInfo, output_dir: Path) -> list[Path]:
         output_dir.mkdir(parents=True, exist_ok=True)
         saved: list[Path] = []
-        for item in post.media:
-            data, _content_type = self.fetch_bytes(item.url)
+        for offset, item in enumerate(post.media):
             path = unique_path(output_dir, item.filename)
+            self.download_file(item.url, path)
             item.filename = path.name
-            path.write_bytes(data)
             saved.append(path)
-            time.sleep(0.15)
+            if offset + 1 < len(post.media):
+                time.sleep(DOWNLOAD_GAP_SECONDS)
         return saved

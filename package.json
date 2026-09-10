@@ -1,6 +1,6 @@
 {
   "name": "juanig",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Download Instagram photos, carousels, videos, and Reels from a link.",
   "license": "MIT",
   "bin": {
@@ -14,7 +14,8 @@
     "juanig",
     "pyproject.toml",
     "README.md",
-    "README.pt-BR.md"
+    "README.pt-BR.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",

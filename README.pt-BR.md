@@ -61,6 +61,7 @@ juanig [URL ...] [opções]
 | `--setup` | Coloca o juanig no PATH e grava skills só nos IDEs instalados |
 | `--install-skills` | Só grava a skill nos IDEs instalados |
 | `--update` | Atualiza para a versão mais recente do GitHub |
+| `-V`, `--version` | Mostra a versão instalada |
 | `-h`, `--help` | Mostra a ajuda |
 
 Variáveis de ambiente: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.

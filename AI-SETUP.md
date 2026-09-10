@@ -36,6 +36,7 @@ Latest release: https://github.com/Juancunhaa-dev/juanig/releases/latest
    Running `juanig --install-skills` does this.
 4. Verify:
    ```bash
+   juanig --version
    juanig --help
    ```
 5. Tell the user it is ready. Next time they can say:

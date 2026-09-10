@@ -36,6 +36,7 @@ Release mais recente: https://github.com/Juancunhaa-dev/juanig/releases/latest
    O comando `juanig --install-skills` faz isso.
 4. Confira:
    ```bash
+   juanig --version
    juanig --help
    ```
 5. Avise que está pronto. Da próxima vez a pessoa pode falar:

@@ -6,6 +6,7 @@ import os
 import sys
 from pathlib import Path
 
+from juanig import __version__
 from juanig.core import InstagramClient, InstagramError, user_downloads_dir
 from juanig.setup_local import run_setup
 
@@ -43,20 +44,27 @@ def main() -> int:
         help="Instagram sessionid cookie when a post requires login",
     )
     parser.add_argument("--json", action="store_true", help="Print JSON (best for agents)")
-    parser.add_argument(
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument(
         "--setup",
         action="store_true",
         help="Put juanig on PATH and copy the skill only into IDEs already installed",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--install-skills",
         action="store_true",
         help="Write the skill only into IDEs already installed on this machine",
     )
-    parser.add_argument(
+    modes.add_argument(
         "--update",
         action="store_true",
         help="Upgrade juanig to the latest version from GitHub",
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     args = parser.parse_args()
 
@@ -72,6 +80,7 @@ def main() -> int:
         from juanig.update import run_update
 
         return run_update()
+
     args.urls = normalize_urls(args.urls)
     if not args.urls:
         parser.print_help()
@@ -116,7 +125,7 @@ def main() -> int:
             )
         )
 
-    return 1 if errors and not posts else 0
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
