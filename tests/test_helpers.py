@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from juanig import __version__
-from juanig.cli import main, normalize_urls
+from juanig.cli import expand_urls, main, normalize_urls, post_payload, selected_index
 from juanig.core import (
     InstagramError,
     MediaItem,
@@ -13,6 +13,7 @@ from juanig.core import (
     describe_post,
     is_safe_cdn_url,
     parse_instagram_url,
+    select_media,
     shortcode_to_pk,
     unique_path,
 )
@@ -44,6 +45,58 @@ class HelperTests(unittest.TestCase):
             normalize_urls(["urls", "https://www.instagram.com/p/AAAA/"]),
             ["https://www.instagram.com/p/AAAA/"],
         )
+
+    def test_expand_urls_from_file(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "links.txt"
+            path.write_text(
+                "# comment\nhttps://www.instagram.com/p/AAAA/\n\nurls\nhttps://www.instagram.com/reel/BBBB/\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                expand_urls([f"@{path}"]),
+                [
+                    "https://www.instagram.com/p/AAAA/",
+                    "https://www.instagram.com/reel/BBBB/",
+                ],
+            )
+
+    def test_select_media_and_index(self) -> None:
+        post = PostInfo(
+            url="https://www.instagram.com/p/AAAA/",
+            shortcode="AAAA",
+            username=None,
+            caption="Hello",
+            product_type=None,
+            media=[
+                MediaItem(index=1, kind="image", url="https://scontent.cdninstagram.com/a.jpg", width=10, height=20),
+                MediaItem(index=2, kind="image", url="https://scontent.cdninstagram.com/b.jpg", width=30, height=40),
+            ],
+        )
+        self.assertEqual(selected_index(True, None), 1)
+        with self.assertRaises(InstagramError):
+            selected_index(True, 2)
+        select_media(post, 2)
+        self.assertEqual(len(post.media), 1)
+        self.assertEqual(post.media[0].index, 2)
+        with self.assertRaises(InstagramError):
+            select_media(post, 9)
+
+    def test_post_payload_keeps_files_and_media(self) -> None:
+        post = PostInfo(
+            url="https://www.instagram.com/p/AAAA/",
+            shortcode="AAAA",
+            username=None,
+            caption="Hello",
+            product_type=None,
+            media=[
+                MediaItem(index=1, kind="image", url="https://scontent.cdninstagram.com/a.jpg", width=10, height=20),
+            ],
+        )
+        payload = post_payload(post.url, post, [Path("photo.jpg")])
+        self.assertEqual(payload["files"], ["photo.jpg"])
+        self.assertEqual(payload["caption"], "Hello")
+        self.assertEqual(payload["media"][0]["width"], 10)
 
     def test_anonymous_names(self) -> None:
         self.assertEqual(anonymous_filename("image", 1, "jpg"), "photo.jpg")

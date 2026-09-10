@@ -48,13 +48,16 @@ juanig [URL ...] [options]
 
 | Argument | Description |
 |---|---|
-| `URL` | One or more Instagram post, carousel, or Reel links |
+| `URL` | One or more Instagram links, `@links.txt`, or `-` for stdin |
 | `-o`, `--output` | Destination folder. Default: the user `Downloads` folder |
-| `--json` | Print JSON with saved paths (best for agents) |
+| `--first` | Download only the first carousel item |
+| `--index N` | Download only carousel item N (1-based) |
+| `--dry-run` | Resolve the post and print paths without downloading |
+| `--json` | Print JSON with saved paths, caption, and sizes (best for agents) |
 | `--sessionid` | Instagram `sessionid` cookie for private/restricted posts |
 | `--setup` | Put juanig on PATH and write AI skills for installed IDEs |
 | `--install-skills` | Only write the skill files for installed IDEs |
-| `--update` | Upgrade to the latest GitHub version |
+| `--update` | Upgrade to the latest PyPI version |
 | `-V`, `--version` | Print the installed version |
 | `-h`, `--help` | Show help |
 
@@ -64,7 +67,9 @@ Environment variables: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.
 
 ```bash
 juanig "https://www.instagram.com/p/AAAA/"
-juanig "https://www.instagram.com/p/AAAA/" "https://www.instagram.com/reel/BBBB/" -o public/images --json
+juanig "https://www.instagram.com/p/AAAA/" --first -o public/images
+juanig @links.txt -o public/images --json
+juanig "https://www.instagram.com/p/AAAA/" --dry-run --json
 ```
 
 ### Output
@@ -81,8 +86,15 @@ Default:
 ```json
 {
   "ok": true,
+  "dry_run": false,
   "output": "C:\\Users\\you\\Downloads",
-  "posts": [{ "files": ["C:\\Users\\you\\Downloads\\photo.jpg"] }],
+  "posts": [{
+    "shortcode": "AAAA",
+    "kind": "Photo",
+    "caption": "Optional caption",
+    "files": ["C:\\Users\\you\\Downloads\\photo.jpg"],
+    "media": [{ "index": 1, "kind": "image", "width": 1440, "height": 1800 }]
+  }],
   "errors": []
 }
 ```

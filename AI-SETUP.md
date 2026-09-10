@@ -50,6 +50,7 @@ Latest release: https://github.com/Juancunhaa-dev/juanig/releases/latest
 
 ```bash
 juanig "https://www.instagram.com/p/SHORTCODE/" -o public/images --json
+juanig "https://www.instagram.com/p/SHORTCODE/" --first -o public/images --json
 ```
 
 - Do not start a Python server

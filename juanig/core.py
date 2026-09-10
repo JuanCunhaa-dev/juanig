@@ -174,6 +174,21 @@ def describe_post(post: PostInfo) -> str:
     return "Photo"
 
 
+def select_media(post: PostInfo, index: int | None) -> PostInfo:
+    if index is None:
+        return post
+    if index < 1:
+        raise InstagramError("Carousel index must be 1 or greater.")
+    if index > len(post.media):
+        raise InstagramError(f"This post has no item {index}.")
+    post.media = [post.media[index - 1]]
+    return post
+
+
+def planned_paths(post: PostInfo, output_dir: Path) -> list[Path]:
+    return [unique_path(output_dir, item.filename) for item in post.media]
+
+
 def _as_json(response: requests.Response) -> dict[str, Any]:
     try:
         payload = response.json()

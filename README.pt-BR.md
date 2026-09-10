@@ -48,13 +48,16 @@ juanig [URL ...] [opções]
 
 | Argumento | Descrição |
 |---|---|
-| `URL` | Um ou mais links de post, carrossel ou Reel |
+| `URL` | Um ou mais links, `@links.txt`, ou `-` para ler do stdin |
 | `-o`, `--output` | Pasta de destino. Padrão: a pasta `Downloads` do usuário |
-| `--json` | Imprime JSON com os caminhos salvos (melhor para agentes) |
+| `--first` | Baixa só o primeiro item do carrossel |
+| `--index N` | Baixa só o item N do carrossel (começando em 1) |
+| `--dry-run` | Resolve o post e mostra os caminhos sem baixar |
+| `--json` | Imprime JSON com caminhos, legenda e tamanhos (melhor para agentes) |
 | `--sessionid` | Cookie `sessionid` do Instagram se o post exigir login |
 | `--setup` | Coloca o juanig no PATH e grava skills só nos IDEs instalados |
 | `--install-skills` | Só grava a skill nos IDEs instalados |
-| `--update` | Atualiza para a versão mais recente do GitHub |
+| `--update` | Atualiza para a versão mais recente do PyPI |
 | `-V`, `--version` | Mostra a versão instalada |
 | `-h`, `--help` | Mostra a ajuda |
 
@@ -64,7 +67,9 @@ Variáveis de ambiente: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.
 
 ```bash
 juanig "https://www.instagram.com/p/AAAA/"
-juanig "https://www.instagram.com/p/AAAA/" "https://www.instagram.com/reel/BBBB/" -o public/images --json
+juanig "https://www.instagram.com/p/AAAA/" --first -o public/images
+juanig @links.txt -o public/images --json
+juanig "https://www.instagram.com/p/AAAA/" --dry-run --json
 ```
 
 ### Saída
@@ -81,8 +86,15 @@ Padrão:
 ```json
 {
   "ok": true,
+  "dry_run": false,
   "output": "C:\\Users\\voce\\Downloads",
-  "posts": [{ "files": ["C:\\Users\\voce\\Downloads\\photo.jpg"] }],
+  "posts": [{
+    "shortcode": "AAAA",
+    "kind": "Photo",
+    "caption": "Legenda opcional",
+    "files": ["C:\\Users\\voce\\Downloads\\photo.jpg"],
+    "media": [{ "index": 1, "kind": "image", "width": 1440, "height": 1800 }]
+  }],
   "errors": []
 }
 ```
