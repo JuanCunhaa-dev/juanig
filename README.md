@@ -36,7 +36,7 @@ pip install git+https://github.com/Juancunhaa-dev/juanig.git
 juanig --install-skills
 ```
 
-`--setup` / `--install-skills` copies the skill into Cursor, Claude Code, Windsurf, Continue, and similar folders when they exist.
+`--setup` / `--install-skills` copies the skill only into IDEs that are already installed (the app folder already exists). It will not create Claude/Windsurf/Continue folders just because you have Cursor.
 
 ## CLI
 

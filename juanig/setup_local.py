@@ -12,13 +12,14 @@ def skill_text() -> str:
 
 def skill_targets() -> list[Path]:
     home = Path.home()
-    targets = [
-        home / ".cursor" / "skills" / "juanig" / "SKILL.md",
-        home / ".claude" / "skills" / "juanig" / "SKILL.md",
-        home / ".codeium" / "windsurf" / "skills" / "juanig" / "SKILL.md",
-        home / ".continue" / "skills" / "juanig" / "SKILL.md",
-        home / ".agents" / "skills" / "juanig" / "SKILL.md",
+    candidates = [
+        (home / ".cursor", home / ".cursor" / "skills" / "juanig" / "SKILL.md"),
+        (home / ".claude", home / ".claude" / "skills" / "juanig" / "SKILL.md"),
+        (home / ".codeium", home / ".codeium" / "windsurf" / "skills" / "juanig" / "SKILL.md"),
+        (home / ".continue", home / ".continue" / "skills" / "juanig" / "SKILL.md"),
+        (home / ".agents", home / ".agents" / "skills" / "juanig" / "SKILL.md"),
     ]
+    targets = [path for marker, path in candidates if marker.exists()]
     cwd = Path.cwd()
     for relative in (
         Path(".cursor") / "skills" / "juanig" / "SKILL.md",
@@ -99,9 +100,12 @@ def run_setup() -> int:
     launcher = install_launcher()
     skills = install_skills()
     print(f"CLI installed: {launcher}")
-    print("Skills installed:")
-    for path in skills:
-        print(f"  {path}")
+    if skills:
+        print("Skills installed for IDEs already present on this machine:")
+        for path in skills:
+            print(f"  {path}")
+    else:
+        print("No AI/IDE skill folder found. The CLI still works; paste AI-SETUP.md if you want a skill.")
     if os.name == "nt":
         print("Open a new terminal so PATH picks up juanig.")
     return 0
