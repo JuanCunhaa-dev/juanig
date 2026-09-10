@@ -1,3 +1,5 @@
+import io
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -153,6 +155,35 @@ class CliTests(unittest.TestCase):
 
     def test_package_version(self) -> None:
         self.assertRegex(__version__, r"^\d+\.\d+\.\d+$")
+
+
+class NoticeTests(unittest.TestCase):
+    def test_is_newer(self) -> None:
+        from juanig.notice import is_newer
+
+        self.assertTrue(is_newer("1.1.3", "1.1.2"))
+        self.assertFalse(is_newer("1.1.2", "1.1.2"))
+        self.assertFalse(is_newer("1.1.1", "1.1.2"))
+
+    def test_skip_when_env_set(self) -> None:
+        from juanig.notice import maybe_warn_update
+
+        with patch.dict(os.environ, {"JUANIG_NO_UPDATE_CHECK": "1"}):
+            with patch("juanig.notice.latest_version") as latest:
+                maybe_warn_update("1.0.0")
+        latest.assert_not_called()
+
+    def test_warns_when_newer(self) -> None:
+        from juanig.notice import maybe_warn_update
+
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder) / "update-check.json"
+            with patch("juanig.notice.cache_path", return_value=cache):
+                with patch("juanig.notice.fetch_latest", return_value="9.9.9"):
+                    with patch("sys.stderr", new_callable=io.StringIO) as err:
+                        maybe_warn_update("1.1.3")
+            self.assertIn("9.9.9 is available", err.getvalue())
+            self.assertIn("juanig --update", err.getvalue())
 
 
 if __name__ == "__main__":

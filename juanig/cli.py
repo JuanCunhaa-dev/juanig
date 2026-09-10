@@ -171,6 +171,10 @@ def main() -> int:
         parser.print_help()
         return 2
 
+    from juanig.notice import maybe_warn_update
+
+    maybe_warn_update()
+
     client = InstagramClient(sessionid=args.sessionid)
     output = Path(args.output).expanduser().resolve()
     posts: list[dict] = []

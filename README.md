@@ -61,7 +61,9 @@ juanig [URL ...] [options]
 | `-V`, `--version` | Print the installed version |
 | `-h`, `--help` | Show help |
 
-Environment variables: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.
+Environment variables: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`, `JUANIG_NO_UPDATE_CHECK`.
+
+On download commands, juanig checks PyPI at most once a day and prints a line on stderr if a newer version exists. Set `JUANIG_NO_UPDATE_CHECK=1` to skip that.
 
 ### Examples
 

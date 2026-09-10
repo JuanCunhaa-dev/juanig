@@ -23,6 +23,7 @@ juanig "URL" ["URL2" ...] -o FOLDER --json
 - `--first` / `--index N` download one carousel item
 - `--dry-run` resolves without writing files
 - `--json` returns paths, caption, width, and height
+- If stderr mentions a newer version, run `juanig --update`
 - Private posts: `JUANIG_SESSIONID` cookie only. Never commit it.
 
 If `juanig` is not on PATH, tell the user to run `juanig --setup` or follow [AI-SETUP.md](https://github.com/Juancunhaa-dev/juanig/blob/main/AI-SETUP.md).

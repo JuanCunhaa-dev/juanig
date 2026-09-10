@@ -61,7 +61,9 @@ juanig [URL ...] [opções]
 | `-V`, `--version` | Mostra a versão instalada |
 | `-h`, `--help` | Mostra a ajuda |
 
-Variáveis de ambiente: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.
+Variáveis de ambiente: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`, `JUANIG_NO_UPDATE_CHECK`.
+
+Nos comandos de download, o juanig consulta o PyPI no máximo uma vez por dia e avisa no stderr se existir versão nova. Use `JUANIG_NO_UPDATE_CHECK=1` para desligar.
 
 ### Exemplos
 
