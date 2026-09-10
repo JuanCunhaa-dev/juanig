@@ -1,0 +1,33 @@
+{
+  "name": "juanig",
+  "version": "1.1.0",
+  "description": "Download Instagram photos, carousels, videos, and Reels from a link.",
+  "license": "MIT",
+  "bin": {
+    "juanig": "npm/juanig.js"
+  },
+  "scripts": {
+    "postinstall": "node npm/postinstall.js"
+  },
+  "files": [
+    "npm",
+    "juanig",
+    "pyproject.toml",
+    "README.md",
+    "README.pt-BR.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanCunhaa-dev/juanig.git"
+  },
+  "homepage": "https://github.com/JuanCunhaa-dev/juanig",
+  "keywords": [
+    "instagram",
+    "download",
+    "cli",
+    "juanig"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

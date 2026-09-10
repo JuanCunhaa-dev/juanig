@@ -13,30 +13,38 @@ Mande este arquivo para uma IA: [AI-SETUP.pt-BR.md](AI-SETUP.pt-BR.md)
 
 ## Instalar
 
-### Windows (recomendado)
+Precisa de **Python 3**. Node é opcional e só entra no `npm i -g`.
 
-No PowerShell:
+### npm
+
+```bash
+npm i -g juanig
+```
+
+Enquanto o pacote não estiver no registry do npm, use o GitHub:
+
+```bash
+npm i -g github:JuanCunhaa-dev/juanig
+```
+
+Por baixo isso roda `pip install` e coloca o `juanig` no PATH.
+
+### Windows (PowerShell)
 
 ```powershell
 irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
 ```
 
-Isso instala o Python se precisar e coloca um `juanig.cmd` no PATH. Depois abra um terminal novo. Não baixe o `juanig.exe` — o Windows bloqueia executável sem assinatura.
-
-### macOS / Linux
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Juancunhaa-dev/juanig/main/installer/install.sh | bash
-```
-
-### Pelo código
+### pip / código
 
 ```bash
 pip install git+https://github.com/Juancunhaa-dev/juanig.git
-juanig --install-skills
+juanig --setup
 ```
 
-`--setup` / `--install-skills` só copia a skill nos IDEs que já estão instalados (a pasta do app já existe). Não cria pasta de Claude/Windsurf/Continue só porque você tem Cursor.
+Para atualizar depois: `juanig --update`.
+
+`--setup` / `--install-skills` só copia a skill nos IDEs que já estão instalados.
 
 ## CLI
 
@@ -50,8 +58,9 @@ juanig [URL ...] [opções]
 | `-o`, `--output` | Pasta de destino. Padrão: a pasta `Downloads` do usuário |
 | `--json` | Imprime JSON com os caminhos salvos (melhor para agentes) |
 | `--sessionid` | Cookie `sessionid` do Instagram se o post exigir login |
-| `--setup` | Instala o exe no PATH e grava as skills de IA |
-| `--install-skills` | Só grava os arquivos da skill |
+| `--setup` | Coloca o juanig no PATH e grava skills só nos IDEs instalados |
+| `--install-skills` | Só grava a skill nos IDEs instalados |
+| `--update` | Atualiza para a versão mais recente do GitHub |
 | `-h`, `--help` | Mostra a ajuda |
 
 Variáveis de ambiente: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.
@@ -95,9 +104,14 @@ https://www.instagram.com/p/AAAA/
 ## Observações
 
 - Só posts públicos, a menos que você passe um `sessionid`
+- Post privado ou bloqueado pede `--sessionid` / `JUANIG_SESSIONID`
 - O Instagram pode limitar acesso anônimo
 - URLs do CDN expiram; o juanig baixa o arquivo na hora
 - Nunca commite cookies
+
+## Aviso
+
+O juanig é extraoficial e não tem ligação com a Meta ou o Instagram. Use para baixar, de forma pessoal e lícita, mídia pública ou conteúdo que você tem direito de usar (por exemplo, assets de um site). Respeite os termos do Instagram e os direitos autorais. Não use para coletar em massa.
 
 ## Licença
 

@@ -13,16 +13,16 @@ Release mais recente: https://github.com/Juancunhaa-dev/juanig/releases/latest
 
 1. Detecte o sistema operacional e o IDE atual.
 2. Instale a CLI:
-   - **Windows:** rode no PowerShell e depois abra um terminal novo:
+   - Prefira npm se o Node existir:
+     ```bash
+     npm i -g github:JuanCunhaa-dev/juanig
+     ```
+     ou, depois que o pacote estiver no npm: `npm i -g juanig`
+   - **Windows:** se não tiver npm, rode no PowerShell e abra um terminal novo:
      ```powershell
      irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
      ```
-     Se falhar, instale o Python 3 e rode:
-     ```powershell
-     python -m pip install --upgrade git+https://github.com/JuanCunhaa-dev/juanig.git
-     python -m juanig --setup
-     ```
-     Não baixe nem execute `juanig.exe`. O Smart App Control do Windows bloqueia o arquivo sem assinatura.
+     Não baixe nem execute `juanig.exe`.
    - **macOS / Linux:**
      ```bash
      curl -fsSL https://raw.githubusercontent.com/Juancunhaa-dev/juanig/main/installer/install.sh | bash

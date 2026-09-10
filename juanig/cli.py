@@ -46,12 +46,17 @@ def main() -> int:
     parser.add_argument(
         "--setup",
         action="store_true",
-        help="Install the CLI on PATH (exe) and copy the skill into detected AI/IDE folders",
+        help="Put juanig on PATH and copy the skill only into IDEs already installed",
     )
     parser.add_argument(
         "--install-skills",
         action="store_true",
-        help="Only install the juanig skill for Cursor, Claude, Windsurf, and similar tools",
+        help="Write the skill only into IDEs already installed on this machine",
+    )
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Upgrade juanig to the latest version from GitHub",
     )
     args = parser.parse_args()
 
@@ -63,6 +68,10 @@ def main() -> int:
         for path in install_skills():
             print(path)
         return 0
+    if args.update:
+        from juanig.update import run_update
+
+        return run_update()
     args.urls = normalize_urls(args.urls)
     if not args.urls:
         parser.print_help()

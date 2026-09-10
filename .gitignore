@@ -12,3 +12,5 @@ downloads/
 .idea/
 .vscode/
 *.spec
+node_modules/
+npm-debug.log*

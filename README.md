@@ -13,28 +13,38 @@ Give this file to an AI: [AI-SETUP.md](AI-SETUP.md)
 
 ## Install
 
-### Windows (recommended)
+Needs **Python 3**. Node is optional and only used for `npm i -g`.
 
-In PowerShell:
+### npm
+
+```bash
+npm i -g juanig
+```
+
+Until the package is on the npm registry, use GitHub:
+
+```bash
+npm i -g github:JuanCunhaa-dev/juanig
+```
+
+That runs `pip install` under the hood and puts `juanig` on PATH.
+
+### Windows (PowerShell)
 
 ```powershell
 irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
 ```
 
-That installs Python if needed, then puts a `juanig.cmd` on PATH. Open a new terminal afterwards. Do not download `juanig.exe` — Windows blocks unsigned executables.
-
-### macOS / Linux
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Juancunhaa-dev/juanig/main/installer/install.sh | bash
-```
-
-### From source
+### pip / source
 
 ```bash
 pip install git+https://github.com/Juancunhaa-dev/juanig.git
-juanig --install-skills
+juanig --setup
 ```
+
+Upgrade later with `juanig --update`.
+
+`--setup` / `--install-skills` copies the skill only into IDEs that are already installed.
 
 `--setup` / `--install-skills` copies the skill only into IDEs that are already installed (the app folder already exists). It will not create Claude/Windsurf/Continue folders just because you have Cursor.
 
@@ -50,8 +60,9 @@ juanig [URL ...] [options]
 | `-o`, `--output` | Destination folder. Default: the user `Downloads` folder |
 | `--json` | Print JSON with saved paths (best for agents) |
 | `--sessionid` | Instagram `sessionid` cookie for private/restricted posts |
-| `--setup` | Install the exe on PATH and write AI skills |
-| `--install-skills` | Only write the skill files |
+| `--setup` | Put juanig on PATH and write AI skills for installed IDEs |
+| `--install-skills` | Only write the skill files for installed IDEs |
+| `--update` | Upgrade to the latest GitHub version |
 | `-h`, `--help` | Show help |
 
 Environment variables: `JUANIG_OUTPUT`, `JUANIG_SESSIONID`.
@@ -95,9 +106,14 @@ https://www.instagram.com/p/AAAA/
 ## Notes
 
 - Public posts only, unless you pass a `sessionid`
+- Private or gated posts need `--sessionid` / `JUANIG_SESSIONID`
 - Instagram can rate-limit anonymous access
 - CDN URLs expire; juanig downloads the file immediately
 - Never commit cookies
+
+## Disclaimer
+
+juanig is unofficial and is not affiliated with Meta or Instagram. Use it for personal, lawful downloads of public media or content you have rights to (for example, assets for a site you are building). Respect Instagram's terms and copyright. Do not use it to scrape at scale.
 
 ## License
 

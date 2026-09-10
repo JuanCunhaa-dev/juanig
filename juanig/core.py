@@ -327,8 +327,9 @@ class InstagramClient:
                 errors.append(f"{method}: {exc}")
 
         raise InstagramError(
-            "Não consegui ler esse post. Ele pode ser privado, ter sido removido "
-            "ou o Instagram está pedindo login. Se for da sua conta, informe o cookie sessionid."
+            "This post looks private, restricted, or Instagram blocked anonymous access. "
+            "Use --sessionid (or the JUANIG_SESSIONID env var) with the sessionid cookie "
+            "from a logged-in Instagram browser session."
         )
 
     def _resolve_polaris(self, url: str, shortcode: str) -> PostInfo:
