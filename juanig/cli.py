@@ -12,13 +12,25 @@ from juanig.setup_local import run_setup
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+DUMMY_TOKENS = {"url", "urls", "link", "links"}
+
+
+def normalize_urls(values: list[str]) -> list[str]:
+    return [value for value in values if value.lower() not in DUMMY_TOKENS]
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="juanig",
+        usage="juanig URL [URL ...] [options]",
         description="Download Instagram photos, carousels, videos, and Reels from a link.",
     )
-    parser.add_argument("urls", nargs="*", help="One or more Instagram post, carousel, or Reel URLs")
+    parser.add_argument(
+        "urls",
+        nargs="*",
+        metavar="URL",
+        help="Instagram post, carousel, or Reel link. Do not type the word urls.",
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -51,6 +63,7 @@ def main() -> int:
         for path in install_skills():
             print(path)
         return 0
+    args.urls = normalize_urls(args.urls)
     if not args.urls:
         parser.print_help()
         return 2
