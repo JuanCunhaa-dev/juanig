@@ -35,10 +35,10 @@ That runs `pip install` under the hood and puts `juanig` on PATH.
 irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
 ```
 
-### pip / source
+### pip
 
 ```bash
-pip install git+https://github.com/Juancunhaa-dev/juanig.git
+pip install juanig
 juanig --setup
 ```
 

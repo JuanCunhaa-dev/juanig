@@ -35,10 +35,10 @@ Por baixo isso roda `pip install` e coloca o `juanig` no PATH.
 irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
 ```
 
-### pip / código
+### pip
 
 ```bash
-pip install git+https://github.com/Juancunhaa-dev/juanig.git
+pip install juanig
 juanig --setup
 ```
 

@@ -13,11 +13,16 @@ Latest release: https://github.com/Juancunhaa-dev/juanig/releases/latest
 
 1. Detect the OS and the current IDE.
 2. Install the CLI:
-   - Prefer npm if Node is available:
+   - Prefer pip:
+     ```bash
+     pip install juanig
+     juanig --setup
+     ```
+   - Or npm if Node is available:
      ```bash
      npm i -g github:JuanCunhaa-dev/juanig
      ```
-     or, after the package is on npm: `npm i -g juanig`
+     After the package is on npm: `npm i -g juanig`
    - **Windows:** if npm is not available, run this in PowerShell, then use a new terminal:
      ```powershell
      irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
