@@ -20,9 +20,8 @@ Release mais recente: https://github.com/Juancunhaa-dev/juanig/releases/latest
      ```
    - Ou npm se o Node existir:
      ```bash
-     npm i -g github:JuanCunhaa-dev/juanig
+     npm i -g juanig
      ```
-     Depois que o pacote estiver no npm: `npm i -g juanig`
    - **Windows:** se não tiver npm, rode no PowerShell e abra um terminal novo:
      ```powershell
      irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex

@@ -21,12 +21,6 @@ Needs **Python 3**. Node is optional and only used for `npm i -g`.
 npm i -g juanig
 ```
 
-Until the package is on the npm registry, use GitHub:
-
-```bash
-npm i -g github:JuanCunhaa-dev/juanig
-```
-
 That runs `pip install` under the hood and puts `juanig` on PATH.
 
 ### Windows (PowerShell)
