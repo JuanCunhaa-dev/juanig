@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "juanig"
+version = "1.0.0"
+description = "Download Instagram photos, carousels, videos, and Reels from a link."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Juan Cunha", email = "github@juancunhaa.dev" }]
+dependencies = ["requests>=2.32"]
+
+[project.urls]
+Homepage = "https://github.com/Juancunhaa-dev/juanig"
+Releases = "https://github.com/Juancunhaa-dev/juanig/releases"
+
+[project.scripts]
+juanig = "juanig.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["juanig*"]
+
+[tool.setuptools.package-data]
+juanig = ["data/*"]

@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build exe
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pyinstaller
+          pyinstaller --noconfirm --onefile --name juanig --collect-all juanig juanig/__main__.py
+      - name: Upload to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ github.event.release.tag_name }} dist/juanig.exe --clobber

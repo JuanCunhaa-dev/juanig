@@ -1,0 +1,103 @@
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from pathlib import Path
+
+from juanig.core import InstagramClient, InstagramError
+from juanig.setup_local import run_setup
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="juanig",
+        description="Download Instagram photos, carousels, videos, and Reels from a link.",
+    )
+    parser.add_argument("urls", nargs="*", help="One or more Instagram post, carousel, or Reel URLs")
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=os.environ.get("JUANIG_OUTPUT", str(Path.cwd() / "downloads")),
+        help="Base folder. Each profile is saved in a subfolder (default: ./downloads)",
+    )
+    parser.add_argument(
+        "--sessionid",
+        default=os.environ.get("JUANIG_SESSIONID"),
+        help="Instagram sessionid cookie when a post requires login",
+    )
+    parser.add_argument("--json", action="store_true", help="Print JSON (best for agents)")
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help="Install the CLI on PATH (exe) and copy the skill into detected AI/IDE folders",
+    )
+    parser.add_argument(
+        "--install-skills",
+        action="store_true",
+        help="Only install the juanig skill for Cursor, Claude, Windsurf, and similar tools",
+    )
+    args = parser.parse_args()
+
+    if args.setup:
+        return run_setup()
+    if args.install_skills:
+        from juanig.setup_local import install_skills
+
+        for path in install_skills():
+            print(path)
+        return 0
+    if not args.urls:
+        parser.print_help()
+        return 2
+
+    client = InstagramClient(sessionid=args.sessionid)
+    output = Path(args.output).expanduser().resolve()
+    posts: list[dict] = []
+    errors: list[dict] = []
+
+    for url in args.urls:
+        try:
+            post = client.resolve(url)
+            saved = client.download_post(post, output)
+            posts.append(
+                {
+                    "url": url,
+                    "username": post.username,
+                    "shortcode": post.shortcode,
+                    "kind": post.to_dict()["kind_label"],
+                    "files": [str(path) for path in saved],
+                }
+            )
+            if not args.json:
+                print(f"{post.username or 'instagram'} · {post.shortcode} · {len(saved)} file(s)")
+                for path in saved:
+                    print(f"  {path}")
+        except InstagramError as exc:
+            errors.append({"url": url, "error": str(exc)})
+            if not args.json:
+                print(f"Error: {url}\n  {exc}", file=sys.stderr)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "ok": not errors,
+                    "output": str(output),
+                    "posts": posts,
+                    "errors": errors,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+
+    return 1 if errors and not posts else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
