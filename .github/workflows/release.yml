@@ -3,6 +3,7 @@ name: Release assets
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   publish-npm:
@@ -21,6 +22,7 @@ jobs:
         run: npm publish --access public
 
   attach-installer:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -12,6 +12,7 @@
   "files": [
     "npm",
     "juanig",
+    "!juanig/**/__pycache__",
     "pyproject.toml",
     "README.md",
     "README.pt-BR.md",
