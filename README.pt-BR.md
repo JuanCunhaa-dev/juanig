@@ -36,7 +36,7 @@ pip install git+https://github.com/Juancunhaa-dev/juanig.git
 juanig --install-skills
 ```
 
-`--setup` / `--install-skills` copia a skill para pastas do Cursor, Claude Code, Windsurf, Continue e afins, quando existirem.
+`--setup` / `--install-skills` só copia a skill nos IDEs que já estão instalados (a pasta do app já existe). Não cria pasta de Claude/Windsurf/Continue só porque você tem Cursor.
 
 ## CLI
 
