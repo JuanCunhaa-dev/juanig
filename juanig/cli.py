@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 
-from juanig.core import InstagramClient, InstagramError
+from juanig.core import InstagramClient, InstagramError, user_downloads_dir
 from juanig.setup_local import run_setup
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -34,8 +34,8 @@ def main() -> int:
     parser.add_argument(
         "-o",
         "--output",
-        default=os.environ.get("JUANIG_OUTPUT", str(Path.cwd() / "downloads")),
-        help="Base folder. Each profile is saved in a subfolder (default: ./downloads)",
+        default=os.environ.get("JUANIG_OUTPUT", str(user_downloads_dir())),
+        help="Folder to save files (default: the user Downloads folder)",
     )
     parser.add_argument(
         "--sessionid",
@@ -80,14 +80,12 @@ def main() -> int:
             posts.append(
                 {
                     "url": url,
-                    "username": post.username,
-                    "shortcode": post.shortcode,
                     "kind": post.to_dict()["kind_label"],
                     "files": [str(path) for path in saved],
                 }
             )
             if not args.json:
-                print(f"{post.username or 'instagram'} · {post.shortcode} · {len(saved)} file(s)")
+                print(f"{len(saved)} file(s)")
                 for path in saved:
                     print(f"  {path}")
         except InstagramError as exc:

@@ -50,6 +50,6 @@ juanig "https://www.instagram.com/p/SHORTCODE/" -o public/images --json
 - Não suba servidor Python
 - Não recrie um scraper do Instagram
 - Sempre use o comando `juanig`
-- Pastas padrão se a pessoa não escolher: `public/images`, depois `src/assets`, depois `./downloads`
-- Os arquivos caem em `PASTA/username/arquivo`
+- Pasta padrão se a pessoa não escolher: a pasta Downloads do usuário
+- Arquivos anônimos: `photo.jpg`, `photo_2.jpg`, `video.mp4` — sem nome de perfil
 - Nunca commite `JUANIG_SESSIONID` nem cookies

@@ -6,7 +6,7 @@ CLI that downloads Instagram photos, carousels, videos, and Reels from a link. B
 juanig "https://www.instagram.com/p/DRH53C9EYV4/" -o public/images
 ```
 
-Saves to `public/images/username/file.jpg`. No web server. Windows install uses Python plus a `.cmd` launcher, so Smart App Control does not block an unsigned `.exe`.
+By default files go to your **Downloads** folder as `photo.jpg` / `video.mp4`, with no profile names. No web server. Windows install uses Python plus a `.cmd` launcher, so Smart App Control does not block an unsigned `.exe`.
 
 Portuguese guide: [README.pt-BR.md](README.pt-BR.md)  
 Give this file to an AI: [AI-SETUP.md](AI-SETUP.md)
@@ -47,7 +47,7 @@ juanig [URL ...] [options]
 | Argument | Description |
 |---|---|
 | `URL` | One or more Instagram post, carousel, or Reel links |
-| `-o`, `--output` | Base folder. Each profile gets a subfolder. Default: `./downloads` |
+| `-o`, `--output` | Destination folder. Default: the user `Downloads` folder |
 | `--json` | Print JSON with saved paths (best for agents) |
 | `--sessionid` | Instagram `sessionid` cookie for private/restricted posts |
 | `--setup` | Install the exe on PATH and write AI skills |
@@ -68,8 +68,8 @@ juanig "https://www.instagram.com/p/AAAA/" "https://www.instagram.com/reel/BBBB/
 Default:
 
 ```text
-barbeariaemilio · DRH53C9EYV4 · 1 file(s)
-  C:\site\public\images\barbeariaemilio\barbeariaemilio_DRH53C9EYV4_01.jpg
+1 file(s)
+  C:\Users\you\Downloads\photo.jpg
 ```
 
 `--json`:
@@ -77,8 +77,8 @@ barbeariaemilio · DRH53C9EYV4 · 1 file(s)
 ```json
 {
   "ok": true,
-  "output": "C:\\site\\public\\images",
-  "posts": [{ "username": "barbeariaemilio", "files": ["...jpg"] }],
+  "output": "C:\\Users\\you\\Downloads",
+  "posts": [{ "files": ["C:\\Users\\you\\Downloads\\photo.jpg"] }],
   "errors": []
 }
 ```

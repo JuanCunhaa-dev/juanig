@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
@@ -129,6 +130,33 @@ def safe_filename_part(value: str | None, fallback: str) -> str:
     return text.strip("._") or fallback
 
 
+def user_downloads_dir() -> Path:
+    if os.name == "nt":
+        return Path(os.environ.get("USERPROFILE", Path.home())) / "Downloads"
+    return Path.home() / "Downloads"
+
+
+def anonymous_filename(kind: str, index: int, ext: str) -> str:
+    stem = "video" if kind == "video" else "photo"
+    if index == 1:
+        return f"{stem}.{ext}"
+    return f"{stem}_{index}.{ext}"
+
+
+def unique_path(directory: Path, filename: str) -> Path:
+    path = directory / filename
+    if not path.exists():
+        return path
+    stem = path.stem
+    suffix = path.suffix
+    number = 2
+    while True:
+        candidate = directory / f"{stem}_{number}{suffix}"
+        if not candidate.exists():
+            return candidate
+        number += 1
+
+
 def describe_post(post: PostInfo) -> str:
     kinds = {item.kind for item in post.media}
     if post.product_type == "clips" or all(item.kind == "video" for item in post.media):
@@ -166,7 +194,6 @@ def _username(media: dict[str, Any]) -> str | None:
 def items_from_v1_media(media: dict[str, Any], shortcode: str) -> list[MediaItem]:
     children = media.get("carousel_media") or [media]
     result: list[MediaItem] = []
-    username = safe_filename_part(_username(media), "instagram")
     for index, child in enumerate(children, start=1):
         image = best_version(((child.get("image_versions2") or {}).get("candidates")) or [])
         video = best_version(child.get("video_versions") or [])
@@ -188,7 +215,7 @@ def items_from_v1_media(media: dict[str, Any], shortcode: str) -> list[MediaItem
                 thumbnail_url=(image or {}).get("url"),
                 width=chosen.get("width"),
                 height=chosen.get("height"),
-                filename=f"{username}_{shortcode}_{index:02d}.{ext}",
+                filename=anonymous_filename(kind, index, ext),
             )
         )
     return result
@@ -199,7 +226,6 @@ def items_from_legacy_node(node: dict[str, Any], shortcode: str) -> list[MediaIt
         (edge.get("node") or {})
         for edge in ((node.get("edge_sidecar_to_children") or {}).get("edges") or [])
     ] or [node]
-    username = safe_filename_part(_username(node), "instagram")
     result: list[MediaItem] = []
     for index, child in enumerate(children, start=1):
         if child.get("is_video") and child.get("video_url"):
@@ -217,7 +243,7 @@ def items_from_legacy_node(node: dict[str, Any], shortcode: str) -> list[MediaIt
                 kind=kind,
                 url=url,
                 thumbnail_url=child.get("display_url") or child.get("thumbnail_src"),
-                filename=f"{username}_{shortcode}_{index:02d}.{ext}",
+                filename=anonymous_filename(kind, index, ext),
             )
         )
     return result
@@ -424,13 +450,12 @@ class InstagramClient:
         return response.content, response.headers.get("content-type") or "application/octet-stream"
 
     def download_post(self, post: PostInfo, output_dir: Path) -> list[Path]:
-        profile = safe_filename_part(post.username, "instagram")
-        target = output_dir / profile
-        target.mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
         saved: list[Path] = []
         for item in post.media:
             data, _content_type = self.fetch_bytes(item.url)
-            path = target / item.filename
+            path = unique_path(output_dir, item.filename)
+            item.filename = path.name
             path.write_bytes(data)
             saved.append(path)
             time.sleep(0.15)

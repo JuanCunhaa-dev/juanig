@@ -50,6 +50,6 @@ juanig "https://www.instagram.com/p/SHORTCODE/" -o public/images --json
 - Do not start a Python server
 - Do not rebuild an Instagram scraper
 - Always use the `juanig` command
-- Default folders if the user does not choose: `public/images`, then `src/assets`, then `./downloads`
-- Files land in `OUTPUT/username/filename`
+- Default folder if the user does not choose: the user Downloads directory
+- Files are anonymous: `photo.jpg`, `photo_2.jpg`, `video.mp4` — no profile names
 - Never commit `JUANIG_SESSIONID` or cookies

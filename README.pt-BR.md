@@ -6,7 +6,7 @@ CLI que baixa fotos, carrosséis, vídeos e Reels do Instagram a partir de um li
 juanig "https://www.instagram.com/p/DRH53C9EYV4/" -o public/images
 ```
 
-Salva em `public/images/username/arquivo.jpg`. Sem servidor web. No Windows a instalação usa Python e um `juanig.cmd`, para o Smart App Control não bloquear um `.exe` sem assinatura.
+Por padrão os arquivos vão para a pasta **Downloads** como `photo.jpg` / `video.mp4`, sem nome de perfil. Sem servidor web. No Windows a instalação usa Python e um `juanig.cmd`, para o Smart App Control não bloquear um `.exe` sem assinatura.
 
 English guide: [README.md](README.md)  
 Mande este arquivo para uma IA: [AI-SETUP.pt-BR.md](AI-SETUP.pt-BR.md)
@@ -47,7 +47,7 @@ juanig [URL ...] [opções]
 | Argumento | Descrição |
 |---|---|
 | `URL` | Um ou mais links de post, carrossel ou Reel |
-| `-o`, `--output` | Pasta base. Cada perfil vira uma subpasta. Padrão: `./downloads` |
+| `-o`, `--output` | Pasta de destino. Padrão: a pasta `Downloads` do usuário |
 | `--json` | Imprime JSON com os caminhos salvos (melhor para agentes) |
 | `--sessionid` | Cookie `sessionid` do Instagram se o post exigir login |
 | `--setup` | Instala o exe no PATH e grava as skills de IA |
@@ -68,8 +68,8 @@ juanig "https://www.instagram.com/p/AAAA/" "https://www.instagram.com/reel/BBBB/
 Padrão:
 
 ```text
-barbeariaemilio · DRH53C9EYV4 · 1 file(s)
-  C:\site\public\images\barbeariaemilio\barbeariaemilio_DRH53C9EYV4_01.jpg
+1 file(s)
+  C:\Users\voce\Downloads\photo.jpg
 ```
 
 `--json`:
@@ -77,8 +77,8 @@ barbeariaemilio · DRH53C9EYV4 · 1 file(s)
 ```json
 {
   "ok": true,
-  "output": "C:\\site\\public\\images",
-  "posts": [{ "username": "barbeariaemilio", "files": ["...jpg"] }],
+  "output": "C:\\Users\\voce\\Downloads",
+  "posts": [{ "files": ["C:\\Users\\voce\\Downloads\\photo.jpg"] }],
   "errors": []
 }
 ```
