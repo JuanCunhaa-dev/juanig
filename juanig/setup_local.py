@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 import sys
 from importlib.resources import files
 from pathlib import Path
@@ -69,32 +68,40 @@ def add_windows_user_path(directory: str) -> None:
         pass
 
 
-def install_binary() -> Path | None:
-    if not getattr(sys, "frozen", False):
-        return None
-    source = Path(sys.executable)
+def install_launcher() -> Path:
     target_dir = install_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
-    target = target_dir / ("juanig.exe" if os.name == "nt" else "juanig")
-    if source.resolve() != target.resolve():
-        shutil.copy2(source, target)
+    stale_exe = target_dir / "juanig.exe"
+    if stale_exe.exists():
+        stale_exe.unlink()
     if os.name == "nt":
+        python = Path(sys.executable)
+        target = target_dir / "juanig.cmd"
+        target.write_text(f'@echo off\r\n"{python}" -m juanig %*\r\n', encoding="ascii")
         add_windows_user_path(str(target_dir))
-    else:
-        target.chmod(target.stat().st_mode | 0o111)
+        return target
+    target = target_dir / "juanig"
+    target.write_text(f"#!/usr/bin/env bash\nexec {sys.executable!s} -m juanig \"$@\"\n", encoding="utf-8")
+    target.chmod(target.stat().st_mode | 0o111)
     return target
 
 
 def run_setup() -> int:
-    binary = install_binary()
+    if getattr(sys, "frozen", False):
+        print(
+            "This unsigned .exe is blocked by Windows Smart App Control. "
+            "Use the PowerShell installer instead:"
+        )
+        print(
+            "  irm https://github.com/JuanCunhaa-dev/juanig/releases/latest/download/install.ps1 | iex"
+        )
+        return 2
+    launcher = install_launcher()
     skills = install_skills()
-    if binary:
-        print(f"CLI installed: {binary}")
-        if os.name == "nt":
-            print("Open a new terminal so PATH picks up juanig.")
-    else:
-        print("Python install detected. Use the juanig command from your environment.")
+    print(f"CLI installed: {launcher}")
     print("Skills installed:")
     for path in skills:
         print(f"  {path}")
+    if os.name == "nt":
+        print("Open a new terminal so PATH picks up juanig.")
     return 0

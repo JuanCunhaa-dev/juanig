@@ -17,7 +17,12 @@ Latest release: https://github.com/Juancunhaa-dev/juanig/releases/latest
      ```powershell
      irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
      ```
-     If that fails, download `juanig.exe` from the latest release into `%LOCALAPPDATA%\Programs\juanig\`, add that folder to the user PATH, and run `juanig --install-skills`.
+     If that fails, install Python 3, then run:
+     ```powershell
+     python -m pip install --upgrade git+https://github.com/JuanCunhaa-dev/juanig.git
+     python -m juanig --setup
+     ```
+     Do not download or run `juanig.exe`. Windows Smart App Control blocks the unsigned file.
    - **macOS / Linux:**
      ```bash
      curl -fsSL https://raw.githubusercontent.com/Juancunhaa-dev/juanig/main/installer/install.sh | bash

@@ -6,7 +6,7 @@ CLI that downloads Instagram photos, carousels, videos, and Reels from a link. B
 juanig "https://www.instagram.com/p/DRH53C9EYV4/" -o public/images
 ```
 
-Saves to `public/images/username/file.jpg`. No web server. No Python to start by hand when you use the `.exe`.
+Saves to `public/images/username/file.jpg`. No web server. Windows install uses Python plus a `.cmd` launcher, so Smart App Control does not block an unsigned `.exe`.
 
 Portuguese guide: [README.pt-BR.md](README.pt-BR.md)  
 Give this file to an AI: [AI-SETUP.md](AI-SETUP.md)
@@ -21,13 +21,7 @@ In PowerShell:
 irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
 ```
 
-Or download `juanig.exe` from [Releases](https://github.com/Juancunhaa-dev/juanig/releases) and run:
-
-```powershell
-.\juanig.exe --setup
-```
-
-Open a new terminal afterwards.
+That installs Python if needed, then puts a `juanig.cmd` on PATH. Open a new terminal afterwards. Do not download `juanig.exe` — Windows blocks unsigned executables.
 
 ### macOS / Linux
 

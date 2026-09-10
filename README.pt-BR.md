@@ -6,7 +6,7 @@ CLI que baixa fotos, carrosséis, vídeos e Reels do Instagram a partir de um li
 juanig "https://www.instagram.com/p/DRH53C9EYV4/" -o public/images
 ```
 
-Salva em `public/images/username/arquivo.jpg`. Sem servidor web. Sem subir Python na mão quando você usa o `.exe`.
+Salva em `public/images/username/arquivo.jpg`. Sem servidor web. No Windows a instalação usa Python e um `juanig.cmd`, para o Smart App Control não bloquear um `.exe` sem assinatura.
 
 English guide: [README.md](README.md)  
 Mande este arquivo para uma IA: [AI-SETUP.pt-BR.md](AI-SETUP.pt-BR.md)
@@ -21,13 +21,7 @@ No PowerShell:
 irm https://github.com/Juancunhaa-dev/juanig/releases/latest/download/install.ps1 | iex
 ```
 
-Ou baixe o `juanig.exe` em [Releases](https://github.com/Juancunhaa-dev/juanig/releases) e rode:
-
-```powershell
-.\juanig.exe --setup
-```
-
-Depois abra um terminal novo.
+Isso instala o Python se precisar e coloca um `juanig.cmd` no PATH. Depois abra um terminal novo. Não baixe o `juanig.exe` — o Windows bloqueia executável sem assinatura.
 
 ### macOS / Linux
 
